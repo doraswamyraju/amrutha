@@ -141,13 +141,23 @@ export const AppProvider = ({ children }) => {
     const fetchData = async () => {
       try {
         const [plotsRes, foundersRes, leadsRes] = await Promise.all([
-          fetch(`${API_URL}/plots`).then(r => r.json()),
-          fetch(`${API_URL}/founders`).then(r => r.json()),
-          fetch(`${API_URL}/leads`).then(r => r.json())
+          fetch(`${API_URL}/plots`).then(r => {
+            if (!r.ok) throw new Error('Failed to fetch plots');
+            return r.json();
+          }),
+          fetch(`${API_URL}/founders`).then(r => {
+            if (!r.ok) throw new Error('Failed to fetch founders');
+            return r.json();
+          }),
+          fetch(`${API_URL}/leads`).then(r => {
+            if (!r.ok) throw new Error('Failed to fetch leads');
+            return r.json();
+          })
         ]);
-        setPlots(plotsRes);
-        setFounders(foundersRes);
-        setLeads(leadsRes);
+
+        setPlots(Array.isArray(plotsRes) ? plotsRes : initialPlots);
+        setFounders(Array.isArray(foundersRes) ? foundersRes : initialFounders);
+        setLeads(Array.isArray(leadsRes) ? leadsRes : initialLeads);
       } catch (error) {
         console.error('Error fetching data from API, using defaults:', error);
         // Fallback to defaults
