@@ -14,9 +14,9 @@ export default function Footer() {
         <div className="footer-top">
           <div className="footer-brand">
             <Link to="/" className="logo-container" style={{ marginBottom: '16px' }}>
-              <img src="/Logo 1.jpg.jpeg" alt="Aamruthaa Developers Logo" style={{ height: '48px', objectFit: 'contain', borderRadius: '4px' }} />
+              <img src="/Logo 1.jpg.jpeg" alt="Amrutha Developers Logo" style={{ height: '48px', objectFit: 'contain', borderRadius: '4px' }} />
               <div className="logo-text">
-                <span className="logo-title" style={{ color: '#ffffff' }}>AMRUTHAA</span>
+                <span className="logo-title" style={{ color: '#ffffff' }}>AMRUTHA</span>
                 <span className="logo-subtitle" style={{ color: 'var(--accent-gold)' }}>D E V E L O P E R S</span>
               </div>
             </Link>
@@ -70,7 +70,7 @@ export default function Footer() {
 
         <div className="footer-bottom">
           <div>
-            © {new Date().getFullYear()} Aamruthaa Developers. All Rights Reserved. Designed for Trust & Growth.
+            © {new Date().getFullYear()} Amrutha Developers. All Rights Reserved. Designed for Trust & Growth.
           </div>
           <div className="footer-socials">
             <a href="#" className="social-circle" aria-label="Website"><Globe size={18} /></a>

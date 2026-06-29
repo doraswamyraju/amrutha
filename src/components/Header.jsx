@@ -18,9 +18,9 @@ export default function Header() {
     <header className="main-header">
       <div className="container header-wrapper">
         <Link to="/" className="logo-container" onClick={() => setIsOpen(false)}>
-          <img src="/Logo 1.jpg.jpeg" alt="Aamruthaa Developers Logo" style={{ height: '48px', objectFit: 'contain', borderRadius: '4px' }} />
+          <img src="/Logo 1.jpg.jpeg" alt="Amrutha Developers Logo" style={{ height: '48px', objectFit: 'contain', borderRadius: '4px' }} />
           <div className="logo-text">
-            <span className="logo-title">AAMRUTHAA</span>
+            <span className="logo-title">AMRUTHA</span>
             <span className="logo-subtitle">D E V E L O P E R S</span>
           </div>
         </Link>
