@@ -130,79 +130,144 @@ const initialLeads = [
 ];
 
 export const AppProvider = ({ children }) => {
-  const [plots, setPlots] = useState(() => {
-    const saved = localStorage.getItem('amrutha_plots');
-    return saved ? JSON.parse(saved) : initialPlots;
-  });
+  const [plots, setPlots] = useState([]);
+  const [founders, setFounders] = useState([]);
+  const [leads, setLeads] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const [founders, setFounders] = useState(() => {
-    const saved = localStorage.getItem('amrutha_founders');
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      if (parsed.some(f => f.name.includes('Amrutha Rao') || f.name.includes('Kiran Kumar'))) {
-        return initialFounders;
+  const API_URL = '/api';
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [plotsRes, foundersRes, leadsRes] = await Promise.all([
+          fetch(`${API_URL}/plots`).then(r => r.json()),
+          fetch(`${API_URL}/founders`).then(r => r.json()),
+          fetch(`${API_URL}/leads`).then(r => r.json())
+        ]);
+        setPlots(plotsRes);
+        setFounders(foundersRes);
+        setLeads(leadsRes);
+      } catch (error) {
+        console.error('Error fetching data from API, using defaults:', error);
+        // Fallback to defaults
+        setPlots(initialPlots);
+        setFounders(initialFounders);
+        setLeads(initialLeads);
+      } finally {
+        setLoading(false);
       }
-      return parsed;
-    }
-    return initialFounders;
-  });
-
-  const [leads, setLeads] = useState(() => {
-    const saved = localStorage.getItem('amrutha_leads');
-    return saved ? JSON.parse(saved) : initialLeads;
-  });
-
-  useEffect(() => {
-    localStorage.setItem('amrutha_plots', JSON.stringify(plots));
-  }, [plots]);
-
-  useEffect(() => {
-    localStorage.setItem('amrutha_founders', JSON.stringify(founders));
-  }, [founders]);
-
-  useEffect(() => {
-    localStorage.setItem('amrutha_leads', JSON.stringify(leads));
-  }, [leads]);
+    };
+    fetchData();
+  }, []);
 
   // CRUD actions for Plots
-  const addPlot = (plot) => {
-    const newPlot = {
-      ...plot,
-      id: `plot-${Date.now()}`
-    };
-    setPlots(prev => [newPlot, ...prev]);
+  const addPlot = async (plot) => {
+    try {
+      const res = await fetch(`${API_URL}/plots`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(plot)
+      });
+      if (res.ok) {
+        const newPlot = await res.json();
+        setPlots(prev => [newPlot, ...prev]);
+      }
+    } catch (error) {
+      console.error('Error adding plot:', error);
+    }
   };
 
-  const updatePlot = (id, updatedPlot) => {
-    setPlots(prev => prev.map(p => p.id === id ? { ...p, ...updatedPlot } : p));
+  const updatePlot = async (id, updatedPlot) => {
+    try {
+      const res = await fetch(`${API_URL}/plots/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedPlot)
+      });
+      if (res.ok) {
+        const savedPlot = await res.json();
+        setPlots(prev => prev.map(p => p.id === id ? savedPlot : p));
+      }
+    } catch (error) {
+      console.error('Error updating plot:', error);
+    }
   };
 
-  const deletePlot = (id) => {
-    setPlots(prev => prev.filter(p => p.id !== id));
+  const deletePlot = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/plots/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setPlots(prev => prev.filter(p => p.id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting plot:', error);
+    }
   };
 
   // Profile actions for Founders
-  const updateFounder = (id, updatedFounder) => {
-    setFounders(prev => prev.map(f => f.id === id ? { ...f, ...updatedFounder } : f));
+  const updateFounder = async (id, updatedFounder) => {
+    try {
+      const res = await fetch(`${API_URL}/founders/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFounder)
+      });
+      if (res.ok) {
+        const savedFounder = await res.json();
+        setFounders(prev => prev.map(f => f.id === id ? savedFounder : f));
+      }
+    } catch (error) {
+      console.error('Error updating founder:', error);
+    }
   };
 
   // Inquiry/Lead actions
-  const addLead = (lead) => {
-    const newLead = {
-      ...lead,
-      id: `lead-${Date.now()}`,
-      date: new Date().toISOString(),
-      status: 'new'
-    };
-    setLeads(prev => [newLead, ...prev]);
+  const addLead = async (lead) => {
+    try {
+      const res = await fetch(`${API_URL}/leads`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(lead)
+      });
+      if (res.ok) {
+        const newLead = await res.json();
+        setLeads(prev => [newLead, ...prev]);
+      }
+    } catch (error) {
+      console.error('Error adding lead:', error);
+    }
   };
 
-  const updateLeadStatus = (id, status) => {
-    setLeads(prev => prev.map(l => l.id === id ? { ...l, status } : l));
+  const updateLeadStatus = async (id, status) => {
+    try {
+      const res = await fetch(`${API_URL}/leads/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        const savedLead = await res.json();
+        setLeads(prev => prev.map(l => l.id === id ? savedLead : l));
+      }
+    } catch (error) {
+      console.error('Error updating lead status:', error);
+    }
   };
 
-  const deleteLead = (id) => {
-    setLeads(prev => prev.filter(l => l.id !== id));
+  const deleteLead = async (id) => {
+    try {
+      const res = await fetch(`${API_URL}/leads/${id}`, {
+        method: 'DELETE'
+      });
+      if (res.ok) {
+        setLeads(prev => prev.filter(l => l.id !== id));
+      }
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+    }
   };
 
   return (
@@ -216,7 +281,8 @@ export const AppProvider = ({ children }) => {
       leads,
       addLead,
       updateLeadStatus,
-      deleteLead
+      deleteLead,
+      loading
     }}>
       {children}
     </AppContext.Provider>
