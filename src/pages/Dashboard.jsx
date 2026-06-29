@@ -72,6 +72,7 @@ export default function Dashboard() {
   const [roadWidth, setRoadWidth] = useState('40 Feet');
   const [status, setStatus] = useState('available');
   const [description, setDescription] = useState('');
+  const [plotMedia, setPlotMedia] = useState([]);
 
   // FOUNDERS EDIT STATE
   const [editingFounder, setEditingFounder] = useState(null);
@@ -81,6 +82,55 @@ export default function Dashboard() {
   const [founderEmail, setFounderEmail] = useState('');
   const [founderPhone, setFounderPhone] = useState('');
   const [founderImage, setFounderImage] = useState('');
+
+  // Media Upload Handlers
+  const handlePlotMediaUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
+    const formData = new FormData();
+    files.forEach(file => formData.append('files', file));
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        const uploadedFiles = await res.json();
+        setPlotMedia(prev => [...prev, ...uploadedFiles]);
+      }
+    } catch (error) {
+      console.error('Error uploading plot media:', error);
+    }
+  };
+
+  const removePlotMedia = (index) => {
+    setPlotMedia(prev => prev.filter((_, idx) => idx !== index));
+  };
+
+  const handleFounderPhotoUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('files', file);
+
+    try {
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      });
+      if (res.ok) {
+        const uploadedFiles = await res.json();
+        if (uploadedFiles.length > 0) {
+          setFounderImage(uploadedFiles[0].url);
+        }
+      }
+    } catch (error) {
+      console.error('Error uploading founder photo:', error);
+    }
+  };
 
   // 1. STATS CALCULATIONS
   const totalPlots = plots.length;
@@ -116,7 +166,8 @@ export default function Dashboard() {
       roadWidth,
       status,
       description: description || `Premium ${facing} open plot in ${ventureName}.`,
-      highlights: ['Clear Title', '100% Vastu', 'Spot Registration']
+      highlights: ['Clear Title', '100% Vastu', 'Spot Registration'],
+      media: plotMedia
     };
 
     if (editingPlot) {
@@ -139,6 +190,7 @@ export default function Dashboard() {
     setRoadWidth('40 Feet');
     setStatus('available');
     setDescription('');
+    setPlotMedia([]);
     setShowPlotModal(true);
   };
 
@@ -153,12 +205,14 @@ export default function Dashboard() {
     setRoadWidth(plot.roadWidth);
     setStatus(plot.status);
     setDescription(plot.description);
+    setPlotMedia(plot.media || []);
     setShowPlotModal(true);
   };
 
   const resetPlotForm = () => {
     setShowPlotModal(false);
     setEditingPlot(null);
+    setPlotMedia([]);
   };
 
   // 4. FOUNDER SAVE ACTION
@@ -641,12 +695,22 @@ export default function Dashboard() {
 
                     <div className="form-group">
                       <label>Photo URL / Avatar Link</label>
-                      <input 
-                        type="text" 
-                        className="form-input" 
-                        value={founderImage} 
-                        onChange={(e) => setFounderImage(e.target.value)} 
-                      />
+                      <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                        <input 
+                          type="text" 
+                          className="form-input" 
+                          style={{ flexGrow: 1 }}
+                          value={founderImage} 
+                          onChange={(e) => setFounderImage(e.target.value)} 
+                        />
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>or</span>
+                        <input 
+                          type="file" 
+                          accept="image/*"
+                          onChange={handleFounderPhotoUpload}
+                          style={{ maxWidth: '180px', fontSize: '0.8rem' }}
+                        />
+                      </div>
                     </div>
 
                     <div className="grid-2">
@@ -940,6 +1004,38 @@ export default function Dashboard() {
                       onChange={(e) => setRoadWidth(e.target.value)}
                     />
                   </div>
+                </div>
+
+                <div className="form-group">
+                  <label>Plot Gallery (Upload Images & Videos)</label>
+                  <input 
+                    type="file" 
+                    multiple 
+                    accept="image/*,video/*" 
+                    onChange={handlePlotMediaUpload} 
+                    className="form-input"
+                    style={{ marginBottom: '12px' }}
+                  />
+                  {plotMedia.length > 0 && (
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(80px, 1fr))', gap: '10px', marginTop: '8px', marginBottom: '12px' }}>
+                      {plotMedia.map((media, idx) => (
+                        <div key={idx} style={{ position: 'relative', width: '80px', height: '80px', borderRadius: '4px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                          {media.type === 'video' ? (
+                            <video src={media.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          ) : (
+                            <img src={media.url} alt="Plot Media" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          )}
+                          <button 
+                            type="button" 
+                            onClick={() => removePlotMedia(idx)}
+                            style={{ position: 'absolute', top: '2px', right: '2px', backgroundColor: 'rgba(239, 68, 68, 0.9)', color: 'white', border: 'none', borderRadius: '50%', width: '18px', height: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', fontSize: '0.65rem' }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
                 <div className="form-group">

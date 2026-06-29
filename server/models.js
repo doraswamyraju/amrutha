@@ -10,7 +10,11 @@ const plotSchema = new mongoose.Schema({
   roadWidth: { type: String, required: true },
   status: { type: String, enum: ['available', 'booking', 'sold'], default: 'available' },
   highlights: [{ type: String }],
-  description: { type: String }
+  description: { type: String },
+  media: [{
+    url: { type: String, required: true },
+    type: { type: String, enum: ['image', 'video'], required: true }
+  }]
 }, {
   toJSON: {
     transform: (doc, ret) => {

@@ -9,6 +9,9 @@ export default function PlotDetail() {
   
   const plot = plots.find(p => p.id === id);
 
+  // Gallery state
+  const [activeMediaIndex, setActiveMediaIndex] = useState(0);
+
   // Lead capture state
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -56,6 +59,19 @@ export default function PlotDetail() {
     return value.toLocaleString('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 });
   };
 
+  const defaultMedia = [
+    {
+      url: plot.ventureName.includes('Meadows') 
+        ? 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800'
+        : plot.ventureName.includes('Royal')
+        ? 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&q=80&w=800'
+        : 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=800',
+      type: 'image'
+    }
+  ];
+  const galleryMedia = plot.media && plot.media.length > 0 ? plot.media : defaultMedia;
+  const activeMedia = galleryMedia[activeMediaIndex] || galleryMedia[0];
+
   return (
     <div className="container section-padding animate-fade-in">
       <Link to="/plots" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', color: 'var(--accent-gold)', marginBottom: '32px', fontWeight: '600' }}>
@@ -66,25 +82,61 @@ export default function PlotDetail() {
       <div className="grid-2">
         {/* Left Column: Image and Details */}
         <div>
-          <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '380px', marginBottom: '30px', boxShadow: 'var(--shadow-md)' }}>
-            <img 
-              src={
-                plot.ventureName.includes('Meadows') 
-                  ? 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800'
-                  : plot.ventureName.includes('Royal')
-                  ? 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&q=80&w=800'
-                  : 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&q=80&w=800'
-              } 
-              alt="Plots Venture view" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
+          <div style={{ position: 'relative', borderRadius: '16px', overflow: 'hidden', height: '380px', marginBottom: '16px', boxShadow: 'var(--shadow-md)', backgroundColor: '#000' }}>
+            {activeMedia.type === 'video' ? (
+              <video 
+                src={activeMedia.url} 
+                controls 
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+              />
+            ) : (
+              <img 
+                src={activeMedia.url} 
+                alt="Plot Media" 
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+              />
+            )}
             <div 
               className={`badge badge-${plot.status}`} 
-              style={{ top: '24px', right: '24px', fontSize: '0.9rem', padding: '8px 18px' }}
+              style={{ top: '24px', right: '24px', fontSize: '0.9rem', padding: '8px 18px', zIndex: 10 }}
             >
               {plot.status === 'available' ? 'Available' : plot.status === 'booking' ? 'Booking Open' : 'Sold Out'}
             </div>
           </div>
+
+          {/* Thumbnails */}
+          {galleryMedia.length > 1 && (
+            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '10px', marginBottom: '30px' }}>
+              {galleryMedia.map((media, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveMediaIndex(idx)}
+                  style={{
+                    width: '70px',
+                    height: '50px',
+                    borderRadius: '6px',
+                    overflow: 'hidden',
+                    border: activeMediaIndex === idx ? '2.5px solid var(--accent-gold)' : '1px solid var(--border-color)',
+                    padding: 0,
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    backgroundColor: '#000'
+                  }}
+                >
+                  {media.type === 'video' ? (
+                    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                      <video src={media.url} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff', fontSize: '0.65rem' }}>
+                        ▶
+                      </div>
+                    </div>
+                  ) : (
+                    <img src={media.url} alt="Thumbnail" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  )}
+                </button>
+              ))}
+            </div>
+          )}
 
           <h2 style={{ fontSize: '2rem', marginBottom: '8px' }}>Plot No. {plot.plotNumber} — {plot.ventureName}</h2>
           <div className="card-location" style={{ fontSize: '1.05rem', marginBottom: '24px' }}>
