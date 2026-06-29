@@ -41,11 +41,8 @@ export default function Header() {
           <Link to="/about" className={`nav-item ${isActive('/about')}`} onClick={() => setIsOpen(false)}>
             About Founders
           </Link>
-          <Link to="/contact" className={`nav-item ${isActive('/contact')}`} onClick={() => setIsOpen(false)}>
-            Contact Us
-          </Link>
           <Link 
-            to="/admin" 
+            to="/contact" 
             className="btn btn-primary" 
             style={{ 
               padding: '8px 18px', 
@@ -56,8 +53,7 @@ export default function Header() {
             }}
             onClick={() => setIsOpen(false)}
           >
-            <LayoutDashboard size={16} />
-            Dashboard
+            Contact Us
           </Link>
         </nav>
       </div>

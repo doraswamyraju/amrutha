@@ -15,6 +15,47 @@ export default function Dashboard() {
     leads, updateLeadStatus, deleteLead 
   } = useContext(AppContext);
 
+  // Authentication State
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return sessionStorage.getItem('amrutha_admin_auth') === 'true';
+  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  
+  // Password Reset State
+  const [isResetMode, setIsResetMode] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSuccessMessage, setResetSuccessMessage] = useState('');
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (email.trim() === 'admin@amruthadevelopers.com' && password === 'Admin@2026') {
+      setIsAuthenticated(true);
+      sessionStorage.setItem('amrutha_admin_auth', 'true');
+      setError('');
+    } else {
+      setError('Invalid email or password. Please use authorized credentials.');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    sessionStorage.removeItem('amrutha_admin_auth');
+    setEmail('');
+    setPassword('');
+  };
+
+  const handleResetPassword = (e) => {
+    e.preventDefault();
+    if (resetEmail.trim() === 'admin@amruthadevelopers.com') {
+      setResetSuccessMessage('Password reset instructions have been sent to your email.');
+      setError('');
+    } else {
+      setError('The entered email address is not registered in our system.');
+    }
+  };
+
   const [activeTab, setActiveTab] = useState('overview'); // overview, properties, founders, leads
 
   // CRUD MODAL STATE FOR PLOTS
@@ -153,6 +194,151 @@ export default function Dashboard() {
     return `₹${val.toLocaleString('en-IN')}`;
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="login-screen-wrapper" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #0b1e36 0%, #1e3a5f 100%)',
+        fontFamily: 'Inter, sans-serif',
+        padding: '20px'
+      }}>
+        <div className="login-card" style={{
+          background: 'rgba(255, 255, 255, 0.95)',
+          borderRadius: '16px',
+          padding: '40px',
+          boxShadow: '0 20px 40px rgba(0, 0, 0, 0.3)',
+          width: '100%',
+          maxWidth: '420px',
+          backdropFilter: 'blur(10px)',
+          textAlign: 'center',
+          animation: 'fadeIn 0.5s ease'
+        }}>
+          <div className="login-logo-container" style={{ marginBottom: '24px' }}>
+            <img src="/Logo 1.jpg.jpeg" alt="Amrutha Developers Logo" style={{ height: '60px', borderRadius: '4px', objectFit: 'contain' }} />
+            <h2 style={{ color: '#0b1e36', marginTop: '12px', fontSize: '1.5rem', fontWeight: '800', letterSpacing: '1px' }}>AMRUTHA DEVELOPERS</h2>
+            <p style={{ fontSize: '0.8rem', color: 'var(--accent-gold)', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '2px', marginTop: '4px' }}>Partners Panel Login</p>
+          </div>
+
+          {error && (
+            <div style={{
+              backgroundColor: '#FEE2E2',
+              color: '#991B1B',
+              padding: '12px',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              marginBottom: '20px',
+              border: '1px solid #FCA5A5',
+              textAlign: 'left'
+            }}>
+              {error}
+            </div>
+          )}
+
+          {resetSuccessMessage && (
+            <div style={{
+              backgroundColor: '#D1FAE5',
+              color: '#065F46',
+              padding: '12px',
+              borderRadius: '8px',
+              fontSize: '0.85rem',
+              marginBottom: '20px',
+              border: '1px solid #A7F3D0',
+              textAlign: 'left'
+            }}>
+              {resetSuccessMessage}
+            </div>
+          )}
+
+          {!isResetMode ? (
+            <form onSubmit={handleLogin} style={{ textAlign: 'left' }}>
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Email Address</label>
+                <input 
+                  type="email" 
+                  className="form-input" 
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #D1D5DB' }}
+                  required
+                  placeholder="admin@amruthadevelopers.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Password</label>
+                <input 
+                  type="password" 
+                  className="form-input" 
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #D1D5DB' }}
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.95rem', fontWeight: '600', borderRadius: '8px' }}>
+                Sign In
+              </button>
+
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <button 
+                  type="button" 
+                  onClick={() => { setIsResetMode(true); setError(''); setResetSuccessMessage(''); }}
+                  style={{ border: 'none', background: 'none', color: '#1d4ed8', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '500' }}
+                >
+                  Forgot / Reset Password?
+                </button>
+              </div>
+            </form>
+          ) : (
+            <form onSubmit={handleResetPassword} style={{ textAlign: 'left' }}>
+              <p style={{ fontSize: '0.85rem', color: '#4B5563', marginBottom: '20px', lineHeight: '1.5' }}>
+                Enter your registered administrator email to receive instructions to reset your password.
+              </p>
+
+              <div className="form-group" style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', color: '#374151', marginBottom: '6px' }}>Registered Email</label>
+                <input 
+                  type="email" 
+                  className="form-input" 
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #D1D5DB' }}
+                  required
+                  placeholder="admin@amruthadevelopers.com"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                />
+              </div>
+
+              <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '12px', fontSize: '0.95rem', fontWeight: '600', borderRadius: '8px' }}>
+                Send Reset Link
+              </button>
+
+              <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                <button 
+                  type="button" 
+                  onClick={() => { setIsResetMode(false); setError(''); setResetSuccessMessage(''); }}
+                  style={{ border: 'none', background: 'none', color: '#4B5563', fontSize: '0.85rem', cursor: 'pointer', fontWeight: '500' }}
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            </form>
+          )}
+
+          <div style={{ marginTop: '30px', borderTop: '1px solid #E5E7EB', paddingTop: '20px' }}>
+            <Link to="/" style={{ color: '#0b1e36', textDecoration: 'none', fontSize: '0.85rem', fontWeight: '600', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+              ← Return to Main Website
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="dashboard-layout animate-fade-in">
       
@@ -162,12 +348,12 @@ export default function Dashboard() {
           <Link to="/" className="logo-container">
             <div className="logo-icon" style={{ width: '35px', height: '35px' }}></div>
             <div className="logo-text">
-              <span className="logo-title" style={{ fontSize: '1.1rem', letterSpacing: '1px' }}>AMRUTHAA</span>
+              <span className="logo-title" style={{ fontSize: '1.1rem', letterSpacing: '1px' }}>AMRUTHA</span>
               <span className="logo-subtitle" style={{ fontSize: '0.5rem', letterSpacing: '2px' }}>PARTNERS PANEL</span>
             </div>
           </Link>
         </div>
-
+ 
         <nav className="sidebar-nav">
           <button 
             className={`sidebar-item ${activeTab === 'overview' ? 'active' : ''}`}
@@ -212,10 +398,14 @@ export default function Dashboard() {
             )}
           </button>
         </nav>
-
-        <div style={{ marginTop: 'auto', padding: '0 16px' }}>
-          <Link to="/" className="sidebar-item" style={{ color: '#F1F5F9', border: '1px solid rgba(255,255,255,0.1)' }}>
+ 
+        <div style={{ marginTop: 'auto', padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <button onClick={handleLogout} className="sidebar-item" style={{ color: '#F87171', border: '1px solid rgba(248,113,113,0.2)', width: '100%', textAlign: 'left', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <LogOut size={18} />
+            Logout Session
+          </button>
+          <Link to="/" className="sidebar-item" style={{ color: '#F1F5F9', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <Building size={18} />
             Back to Website
           </Link>
         </div>
